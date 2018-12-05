@@ -1,6 +1,7 @@
 package masterung.th.in.androidthai.mysupermay;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
@@ -9,6 +10,8 @@ import android.location.LocationManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -22,7 +25,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap mMap;
     private LocationManager locationManager;
     private Criteria criteria;
-    private double latADouble = 0, lngADouble = 0;
+    private double latADouble = 0, lngADouble = 0, shopLatADouble, shopLngADouble;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,8 +39,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //        Setup Logcation
         setupLogcation();
 
+//        Home Controller
+        homeController();
 
     }   // Main Method
+
+    private void homeController() {
+
+        Button button = findViewById(R.id.btnHome);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MapsActivity.this, MainActivity.class);
+                intent.putExtra("Lat", shopLatADouble);
+                intent.putExtra("Lng", shopLngADouble);
+                startActivity(intent);
+                finish();
+            }
+        });
+
+    }
 
     @Override
     protected void onResume() {
@@ -144,23 +165,31 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         setupCenterMap();
 
 //        Map Controller
-        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-            @Override
-            public void onMapClick(LatLng latLng) {
-
-                mMap.clear();
-                createMarker(latLng);
-
-
-
-            }
-        });
+        mapController();
 
 
     }   // onMapReady
 
+    private void mapController() {
+        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+
+                shopLatADouble = latLng.latitude;
+                shopLngADouble = latLng.longitude;
+
+                mMap.clear();
+                createMarker(latLng);
+
+            }
+        });
+    }
+
     private void setupCenterMap() {
         if (latADouble != 0) {
+
+            shopLatADouble = latADouble;
+            shopLngADouble = lngADouble;
 
             LatLng latLng = new LatLng(latADouble, lngADouble);
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16));
